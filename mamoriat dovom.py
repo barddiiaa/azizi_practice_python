@@ -1,18 +1,34 @@
-def solve_puzzles(puzzles):
-    with open(puzzles,'r') as file:
-           words = file.readlines()
-    boolean_list = []
-    for word in words:
-            word = word.strip()
-            if 'true' in word. lower() or 'false' in word. lower():
-                  if word.startswith("'"):
-                       word = word[1:]
-                  if word.endswith("'"):
-                       word = word[:-1]
+def interpret_statement(statement, suspect_truth):
+    if isinstance(statement, bool):
+        return statement
+    if 'not' in statement:
+        mentioned_suspect = statement.split(' ')[1]
+        return not suspect_truth[mentioned_suspect]
+    return suspect_truth[statement]
 
+def evaluate_suspect(suspect, statements):
+    suspect_truth = {s: s == suspect for s in statements}
+    
+    true_count = 0
+    false_count = 0
+    for s in statements:
+        for statement in statements[s]:
+            if interpret_statement(statement, suspect_truth):
+                true_count += 1
+            else:
+                false_count += 1
+    return true_count == false_count
 
-            boolean_list.append(eval(word))
-            
-            return boolean_list
+def guilty(sus):
+    for suspect in sus.keys():
+        if evaluate_suspect(suspect, sus):
+            print(f'{suspect} is the thief')
 
-print(solve_puzzles('puzzles.txt'))
+sus = {
+    'a': [False, 'b', True],
+    'b': ['not d', 'not a', 'not b'],
+    'c': [True, 'not b', True],
+    'd': ['d', False, 'a']
+}
+
+guilty(sus)
